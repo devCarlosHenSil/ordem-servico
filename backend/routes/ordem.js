@@ -2,9 +2,29 @@ const express = require('express');
 const router = express.Router();
 const OrdemDeServico = require('../models/OrdemDeServico');
 const authMiddleware = require('../middleware/authMiddleware'); // Importa o middleware
+const { gerarRelatorioPDF, gerarRelatorioExcel } = require('../utils/relatorio'); // Importa as funções
 
 // Aplica o middleware a todas as rotas abaixo
 router.use(authMiddleware);
+
+// Rota para gerar relatório em PDF
+router.get('/relatorio/pdf', async (req, res) => {
+  try {
+    await gerarRelatorioPDF(res);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao gerar o relatório PDF' });
+  }
+});
+
+// Rota para gerar relatório em Excel
+router.get('/relatorio/excel', async (req, res) => {
+  try {
+    await gerarRelatorioExcel(res);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao gerar o relatório Excel' });
+  }
+});
+
 
 // POST /api/ordens - criar nova OS
 router.post('/', async (req, res) => {

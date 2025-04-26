@@ -1,4 +1,4 @@
-const relatorioService = require('../../application/services/relatorioService');
+const relatorioService = require('./application/services/relatorioService');
 
 // Função para fazer download do PDF
 exports.downloadPDF = async (req, res) => {

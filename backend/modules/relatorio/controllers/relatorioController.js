@@ -1,4 +1,4 @@
-﻿const relatorioService = require('../application/usecases/relatorioService');
+﻿const relatorioService = require('../application/services/relatorioService');
 
 exports.downloadPDF = async (req, res) => {
   try {

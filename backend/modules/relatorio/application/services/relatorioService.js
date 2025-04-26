@@ -1,5 +1,5 @@
-﻿const { gerarRelatorioPDF, gerarRelatorioExcel } = require('../../infrastructure/relatorioUtils');
+﻿//relatoriService.js
+const { gerarRelatorioPDF, gerarRelatorioExcel } = require('../../infrastructure/relatorioUtils');
 
-exports.gerarPDF = async (res) => await gerarRelatorioPDF(res);
-exports.gerarExcel = async (res) => await gerarRelatorioExcel(res);
-  
+exports.gerarPDF = res => gerarRelatorioPDF(res);
+exports.gerarExcel = res => gerarRelatorioExcel(res);

@@ -1,0 +1,84 @@
+Listagem de caminhos de pasta
+O número de série do volume é 2C8F-C5EF
+C:.
+¦   .env
+¦   estrutura.txt
+¦   package-lock.json
+¦   package.json
+¦   server.js
+¦   
++---assets
+¦       logo.png
+¦       
++---config
+¦       database.js
+¦       
++---errors
+¦       index.js
+¦       
++---middleware
+¦       auth.js
+¦       
++---modules
+    +---auth
+    ¦   +---application
+    ¦   ¦   +---usecases
+    ¦   ¦           userService.js
+    ¦   ¦           
+    ¦   +---domain
+    ¦   +---dto
+    ¦   +---infrastructure
+    ¦   ¦   +---models
+    ¦   ¦           userModel.js
+    ¦   ¦           
+    ¦   +---interfaces
+    ¦       +---controllers
+    ¦       ¦       authController.js
+    ¦       ¦       
+    ¦       +---routes
+    ¦               authRoutes.js
+    ¦               
+    +---os
+    ¦   +---application
+    ¦   ¦   +---usecases
+    ¦   ¦           ordemService.js
+    ¦   ¦           
+    ¦   +---controllers
+    ¦   +---domain
+    ¦   ¦       OrdemDeServico.js
+    ¦   ¦       
+    ¦   +---dto
+    ¦   +---infrastructure
+    ¦   ¦   +---models
+    ¦   ¦           ordemModel.js
+    ¦   ¦           
+    ¦   +---interfaces
+    ¦       +---controllers
+    ¦       ¦       ordemController.js
+    ¦       ¦       
+    ¦       +---routes
+    ¦               ordemRoutes.js
+    ¦               
+    +---relatorio
+        +---application
+        ¦   +---services
+        ¦           enviarEmailRelatorio.js
+        ¦           enviarWhatsAppRelatorio.js
+        ¦           gerarExcel.js
+        ¦           gerarPDF.js
+        ¦           relatorioService.js
+        ¦           
+        +---controllers
+        ¦       relatorioController.js
+        ¦       
+        +---dto
+        +---infrastructure
+        ¦       relatorioUtils.js
+        ¦       
+        +---interfaces
+            +---controllers
+            ¦       relatorioController.js
+            ¦       
+            +---routes
+                    relatorioRoutes.js
+                    

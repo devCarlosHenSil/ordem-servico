@@ -1,156 +1,159 @@
+// backend/modules/relatorio/infrastructure/relatorioUtils.js
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
-const OrdemDeServico = require('../../os/domain/OrdemDeServico');
+const Ordem = require('../../os/infrastructure/models/ordemModel'); 
 const path = require('path');
 
-// PDF
-const gerarRelatorioPDF = async (res) => {
-  if (!res || typeof res.setHeader !== 'function') {
-    throw new Error('Response object inválido ao gerar PDF');
-  }
-
+// Função para gerar relatório em PDF
+async function gerarRelatorioPDF(res) {
   const doc = new PDFDocument({ margin: 40 });
   const fileName = 'relatorio_ordens.pdf';
 
+  // cabeçalhos HTTP
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
   doc.pipe(res);
 
-  // Logo
-  const logoPath = path.join(__dirname, '../../../../assets/logo.png');
+  // logo
+  const logoPath = path.join(__dirname, '../../../assets/logo.png');
   try {
     doc.image(logoPath, { fit: [120, 120], align: 'center' });
   } catch {
-    console.warn('⚠️ Logo não carregada (path:', logoPath, ')');
+    console.warn('⚠️ Logo não encontrada ou não carregada.');
   }
 
   doc.moveDown();
   doc.fontSize(18).text('Relatório de Ordens de Serviço', { align: 'center' });
   doc.moveDown();
 
-  const ordens = await OrdemDeServico.find();
+  const ordens = await Ordem.find();
 
-  ordens.forEach(ordem => {
-    doc.fontSize(12).text(`ID: ${ordem._id}`);
-    doc.text(`Cliente: ${ordem.cliente.nome || JSON.stringify(ordem.cliente)}`);
-    doc.text(`Descrição: ${ordem.defeitoRelatado || ordem.descricao}`);
+  ordens.forEach(o => {
+    doc.fontSize(12).text(`ID: ${o._id}`);
+    doc.text(`Cliente: ${o.cliente.nome}`);
+    doc.text(`Contato: ${o.cliente.contato}`);
+    doc.text(`Endereço: ${o.cliente.endereco}`);
+    doc.text(`Equipamento: ${o.equipamento.tipo} - ${o.equipamento.marca} ${o.equipamento.modelo} (S/N: ${o.equipamento.numeroSerie})`);
+    doc.text(`Defeito relatado: ${o.defeitoRelatado}`);
+    doc.text(`Diagnóstico: ${o.diagnostico || ''}`);
+    doc.text(`Serviços executados: ${o.servicosExecutados || ''}`);
+    doc.text(`Peças substituídas: ${o.pecasSubstituidas.join(', ') || ''}`);
 
-    // Equipamento
-    if (ordem.equipamento) {
-      const eq = ordem.equipamento;
-      doc.text(`Equipamento: ${eq.tipo} | ${eq.marca} ${eq.modelo} (S/N: ${eq.numeroSerie})`);
-    }
-
-    // Peças
-    if (Array.isArray(ordem.pecasSubstituidas) && ordem.pecasSubstituidas.length) {
-      doc.text(`Peças substituídas: ${ordem.pecasSubstituidas.join(', ')}`);
-    }
-
-    // Data de entrada
-    if (ordem.dataEntrada) {
-      doc.text(`Data de entrada: ${new Date(ordem.dataEntrada).toLocaleDateString()}`);
-    }
-
-    // Status colorido
-    let status = ordem.status || 'Desconhecido';
-    let color = 'black';
-    if (status.toLowerCase() === 'aberta') color = 'blue';
-    if (status.toLowerCase() === 'em andamento') color = 'orange';
-    if (status.toLowerCase() === 'concluída') color = 'green';
-    if (status.toLowerCase() === 'cancelada') color = 'red';
-
+    // cor por status
+    let status = o.status || 'Desconhecido', color = 'black';
+    if (status === 'Aberta') color = 'blue';
+    if (status === 'Em andamento') color = 'orange';
+    if (status === 'Concluída') color = 'green';
+    if (status === 'Cancelada') color = 'red';
     doc.fillColor(color).text(`Status: ${status}`);
     doc.fillColor('black');
 
-    // Valor
-    const valor = ordem.valorTotal ?? ordem.valor ?? 0;
-    doc.text(`Valor: R$ ${Number(valor).toFixed(2)}`);
+    // datas e valor
+    const entrada = o.dataEntrada ? new Date(o.dataEntrada).toLocaleDateString() : '';
+    const conclusao = o.dataConclusao ? new Date(o.dataConclusao).toLocaleDateString() : '';
+    const valor = isNaN(o.valorTotal) ? 0 : o.valorTotal;
+    doc.text(`Entrada: ${entrada}`);
+    doc.text(`Conclusão: ${conclusao}`);
+    doc.text(`Valor total: R$ ${valor.toFixed(2)}`);
 
-    doc.moveDown().text('—'.repeat(40)).moveDown();
+    doc.moveDown().text('-----------------------------------------------------').moveDown();
   });
 
   doc.end();
-};
+}
 
-// Excel
-const gerarRelatorioExcel = async (res) => {
-  if (!res || typeof res.setHeader !== 'function') {
-    throw new Error('Response object inválido ao gerar Excel');
-  }
-
+// Função para gerar relatório em Excel
+async function gerarRelatorioExcel(res) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Ordens de Serviço');
 
-  worksheet.columns = [
-    { header: 'ID', key: '_id', width: 30 },
-    { header: 'Cliente', key: 'cliente', width: 30 },
-    { header: 'Descrição', key: 'descricao', width: 30 },
-    { header: 'Equipamento', key: 'equipamento', width: 40 },
-    { header: 'Peças', key: 'pecas', width: 30 },
-    { header: 'Data Entrada', key: 'dataEntrada', width: 15 },
-    { header: 'Status', key: 'status', width: 20 },
-    { header: 'Valor (R$)', key: 'valor', width: 15 },
+  // Logo (inserida como imagem na célula A1)
+  const logoPath = path.join(__dirname, '../../../assets/logo.png');
+  let logoId;
+  try {
+    logoId = workbook.addImage({
+      filename: logoPath,
+      extension: 'png',
+    });
+    worksheet.addImage(logoId, 'A1:D4');
+  } catch {
+    console.warn('⚠️ Logo não encontrada ou não adicionada ao Excel.');
+  }
+
+  // Cabeçalho começa na linha 6
+  const headerRow = worksheet.getRow(6);
+  const cols = [
+    'ID', 'Cliente', 'Contato', 'Endereço',
+    'Equipamento', 'Defeito', 'Diagnóstico',
+    'Serviços', 'Peças', 'Status',
+    'Entrada', 'Conclusão', 'Valor (R$)'
   ];
+  worksheet.columns = cols.map(hdr => ({ header: hdr, key: hdr.toLowerCase().replace(/[^a-z]/g,''), width: 20 }));
+  headerRow.values = cols;
+  headerRow.font = { bold: true };
+  headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+  headerRow.eachCell(cell => {
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD3D3D3' }
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  });
 
-  // Cabeçalho em negrito e congelar primeira linha
-  worksheet.getRow(1).font = { bold: true };
-  worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+  // Congela até a linha 6 (logo + cabeçalho)
+  worksheet.views = [{ state: 'frozen', ySplit: 6 }];
 
-  const ordens = await OrdemDeServico.find();
+  // Busca dados
+  const ordens = await Ordem.find();
 
-  ordens.forEach(ordem => {
-    const equip = ordem.equipamento
-      ? `${ordem.equipamento.tipo} | ${ordem.equipamento.marca} ${ordem.equipamento.modelo}`
-      : '';
-    const pecas = Array.isArray(ordem.pecasSubstituidas)
-      ? ordem.pecasSubstituidas.join(', ')
-      : '';
-    const dataEnt = ordem.dataEntrada
-      ? new Date(ordem.dataEntrada).toLocaleDateString()
-      : '';
-
-    const valor = ordem.valorTotal ?? ordem.valor ?? 0;
-    const lowerStatus = (ordem.status || '').toLowerCase();
+  // Preenche linhas a partir da 7
+  ordens.forEach(o => {
+    const entrada = o.dataEntrada ? new Date(o.dataEntrada).toLocaleDateString() : '';
+    const conclusao = o.dataConclusao ? new Date(o.dataConclusao).toLocaleDateString() : '';
+    const valor = isNaN(o.valorTotal) ? 0 : o.valorTotal;
 
     const row = worksheet.addRow({
-      _id: ordem._id,
-      cliente: ordem.cliente.nome || JSON.stringify(ordem.cliente),
-      descricao: ordem.defeitoRelatado || ordem.descricao,
-      equipamento: equip,
-      pecas,
-      dataEntrada: dataEnt,
-      status: ordem.status,
-      valor: Number(valor).toFixed(2),
+      id: o._id.toString(),
+      cliente: o.cliente.nome,
+      contato: o.cliente.contato,
+      endereco: o.cliente.endereco,
+      equipamento: `${o.equipamento.tipo} - ${o.equipamento.marca} ${o.equipamento.modelo} (S/N: ${o.equipamento.numeroSerie})`,
+      defeito: o.defeitoRelatado,
+      diagnostico: o.diagnostico || '',
+      servicos: o.servicosExecutados || '',
+      pecas: o.pecasSubstituidas.join(', '),
+      status: o.status,
+      entrada,
+      conclusao,
+      valor: valor.toFixed(2)
     });
 
-    // Cor de fundo por status
-    let fillColor = '';
-    if (lowerStatus === 'aberta') fillColor = 'ADD8E6';
-    if (lowerStatus === 'em andamento') fillColor = 'FFFACD';
-    if (lowerStatus === 'concluída') fillColor = '90EE90';
-    if (lowerStatus === 'cancelada') fillColor = 'FFCCCB';
+    // cor de fundo por status
+    let bg = null;
+    if (o.status === 'Aberta') bg = 'ADD8E6';
+    if (o.status === 'Em andamento') bg = 'FFFACD';
+    if (o.status === 'Concluída') bg = '90EE90';
+    if (o.status === 'Cancelada') bg = 'FFCCCB';
 
-    if (fillColor) {
+    if (bg) {
       row.eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: fillColor }
-        };
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
-        };
+        cell.fill = { type: 'pattern', pattern:'solid', fgColor:{ argb: bg } };
       });
     }
   });
 
+  // envia ao client
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=relatorio_ordens.xlsx');
+
   await workbook.xlsx.write(res);
   res.end();
-};
+}
 
 module.exports = { gerarRelatorioPDF, gerarRelatorioExcel };

@@ -1,0 +1,136 @@
+Listagem de caminhos de pasta
+O número de série do volume é 2C8F-C5EF
+C:.
+¦   .editorconfig
+¦   .gitignore
+¦   estrutura.txt
+¦   manual.md
+¦   package-lock.json
+¦   package.json
+¦   postcss.config.js
+¦   tailwind.config.js
+¦   vercel.json
+¦   
++---.vercel
+¦       project.json
+¦       README.txt
+¦       
++---backend
+¦   ¦   .env
+¦   ¦   estrutura.txt
+¦   ¦   package-lock.json
+¦   ¦   package.json
+¦   ¦   server.js
+¦   ¦   
+¦   +---assets
+¦   ¦       logo.png
+¦   ¦       
+¦   +---config
+¦   ¦       database.js
+¦   ¦       
+¦   +---errors
+¦   +---modules
+¦   ¦   +---auth
+¦   ¦   ¦   +---application
+¦   ¦   ¦   ¦       userService.js
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---domain
+¦   ¦   ¦   +---dto
+¦   ¦   ¦   +---infrastructure
+¦   ¦   ¦   ¦   +---models
+¦   ¦   ¦   ¦           UserModel.js
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---interfaces
+¦   ¦   ¦       +---controllers
+¦   ¦   ¦       ¦       authController.js
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---routes
+¦   ¦   ¦               authRoutes.js
+¦   ¦   ¦               
+¦   ¦   +---os
+¦   ¦   ¦   +---application
+¦   ¦   ¦   ¦   +---usecases
+¦   ¦   ¦   ¦           ordemService.js
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---controllers
+¦   ¦   ¦   +---domain
+¦   ¦   ¦   ¦       OrdemDeServico.js
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---dto
+¦   ¦   ¦   +---infrastructure
+¦   ¦   ¦   ¦   ¦   OrdemModel.js
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---models
+¦   ¦   ¦   +---interfaces
+¦   ¦   ¦       +---controllers
+¦   ¦   ¦       ¦       ordemController.js
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---routes
+¦   ¦   ¦               ordemRoutes.js
+¦   ¦   ¦               osRoutes.js
+¦   ¦   ¦               
+¦   ¦   +---relatorio
+¦   ¦       +---application
+¦   ¦       ¦       enviarEmailRelatorio.js
+¦   ¦       ¦       enviarWhatsAppRelatorio.js
+¦   ¦       ¦       gerarExcel.js
+¦   ¦       ¦       gerarPDF.js
+¦   ¦       ¦       relatorioService.js
+¦   ¦       ¦       
+¦   ¦       +---controllers
+¦   ¦       ¦       relatorioController.js
+¦   ¦       ¦       
+¦   ¦       +---dto
+¦   ¦       +---infrastructure
+¦   ¦       ¦       relatorioUtils.js
+¦   ¦       ¦       
+¦   ¦       +---interfaces
+¦   ¦           +---controllers
+¦   ¦           ¦       relatorioController.js
+¦   ¦           ¦       
+¦   ¦           +---routes
+¦   ¦                   relatorioRoutes.js
+¦   ¦                   
+¦   +---shared
+¦       +---middleware
+¦               auth.js
+¦               authMiddleware.js
+¦               
++---public
+¦       favicon.ico
+¦       index.html
+¦       
++---src
+    ¦   App.js
+    ¦   index.js
+    ¦   routes.js
+    ¦   
+    +---assets
+    ¦       logo.png
+    ¦       
+    +---components
+    ¦       Button.jsx
+    ¦       Input.jsx
+    ¦       
+    +---contexts
+    ¦       AuthContext.js
+    ¦       
+    +---modules
+    ¦   +---os
+    ¦       +---controllers
+    ¦               ordemController.js
+    ¦               
+    +---pages
+    ¦       Dashboard.jsx
+    ¦       Login.jsx
+    ¦       OrdensPage.jsx
+    ¦       SplashScreen.jsx
+    ¦       
+    +---services
+    ¦       api.js
+    ¦       authService.js
+    ¦       ordensService.js
+    ¦       
+    +---styles
+            tailwind.css
+            

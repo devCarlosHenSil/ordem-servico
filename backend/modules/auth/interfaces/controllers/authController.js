@@ -1,5 +1,4 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+const User = require('../../infrastructure/models/userModel');
 const jwt = require('jsonwebtoken');
 
 exports.login = async (req, res) => {
@@ -9,7 +8,7 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.compararSenha(password);
     if (!isMatch) return res.status(400).json({ message: 'Senha incorreta' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -21,15 +20,13 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password } = req.body;
+  const { nome, email, password } = req.body;
 
   try {
     const userExist = await User.findOne({ email });
     if (userExist) return res.status(400).json({ message: 'Email já cadastrado' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({ email, password: hashedPassword });
+    const newUser = new User({ nome, email, password });
     await newUser.save();
 
     res.status(201).json({ message: 'Usuário criado com sucesso' });

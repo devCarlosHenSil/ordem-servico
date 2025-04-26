@@ -1,14 +1,19 @@
-//relatorioRoutes.js
-
 const express = require('express');
-const router  = express.Router();
-const auth    = require('../../../middleware/auth');
-const ctrl    = require('../controllers/relatorioController');
+const router = express.Router();
 
-router.use(auth);
+// Ajuste o path do middleware conforme sua estrutura
+const authMiddleware = require('../../../middleware/auth');
+const relatorioController = require('../controllers/relatorioController');
 
-router.get('/pdf',   ctrl.downloadPDF);
-router.get('/excel', ctrl.downloadExcel);
+// Aplica autenticação
+router.use(authMiddleware);
+
+// Rota PDF
+// GET /api/ordens/relatorio/pdf
+router.get('/pdf', relatorioController.downloadPDF);
+
+// Rota Excel
+// GET /api/ordens/relatorio/excel
+router.get('/excel', relatorioController.downloadExcel);
 
 module.exports = router;
-

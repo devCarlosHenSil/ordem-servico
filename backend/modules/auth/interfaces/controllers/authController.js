@@ -1,36 +1,49 @@
-const User = require('../../infrastructure/models/userModel');
+const User = require('../../infrastructure/models/UserModel');
 const jwt = require('jsonwebtoken');
 
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
-
+exports.register = async (req, res) => {
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
+    const { nome, email, senha } = req.body;
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+    }
 
-    const isMatch = await user.compararSenha(password);
-    if (!isMatch) return res.status(400).json({ message: 'Senha incorreta' });
+    if (await User.findOne({ email })) {
+      return res.status(409).json({ error: 'Email já cadastrado' });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token, user: { id: user._id, email: user.email } });
+    const newUser = new User({ nome, email, senha });
+    await newUser.save();
+    return res.status(201).json({
+      message: 'Usuário criado com sucesso',
+      usuario: { id: newUser._id, nome: newUser.nome, email: newUser.email }
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Erro register:', err);
+    return res.status(500).json({ error: 'Erro interno no servidor' });
   }
 };
 
-exports.register = async (req, res) => {
-  const { nome, email, password } = req.body;
-
+exports.login = async (req, res) => {
   try {
-    const userExist = await User.findOne({ email });
-    if (userExist) return res.status(400).json({ message: 'Email já cadastrado' });
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+    }
 
-    const newUser = new User({ nome, email, password });
-    await newUser.save();
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
 
-    res.status(201).json({ message: 'Usuário criado com sucesso' });
+    if (!(await user.compararSenha(senha))) {
+      return res.status(401).json({ error: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, usuario: { id: user._id, nome: user.nome, email: user.email } });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Erro login:', err);
+    return res.status(500).json({ error: 'Erro interno no servidor' });
   }
 };

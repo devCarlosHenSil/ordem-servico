@@ -1,33 +1,24 @@
-// backend/modules/os/application/usecases/ordemService.js
+const OrdemDeServico = require('../../infrastructure/models/ordemModel');
 
-// Ajuste o caminho para o seu modelo de OS
-const OrdemDeServico = require('../../domain/OrdemDeServico');
-
-const criarOrdem = async (dados) => {
+async function criarOrdem(dados) {
   const ordem = new OrdemDeServico(dados);
   return await ordem.save();
-};
+}
 
-const listarOrdens = async () => {
+async function listarOrdens() {
   return await OrdemDeServico.find();
-};
+}
 
-const buscarPorId = async (id) => {
+async function buscarPorId(id) {
   return await OrdemDeServico.findById(id);
-};
+}
 
-const atualizarOrdem = async (id, dados) => {
+async function atualizarOrdem(id, dados) {
   return await OrdemDeServico.findByIdAndUpdate(id, dados, { new: true });
-};
+}
 
-const deletarOrdem = async (id) => {
+async function deletarOrdem(id) {
   return await OrdemDeServico.findByIdAndDelete(id);
-};
+}
 
-module.exports = {
-  criarOrdem,
-  listarOrdens,
-  buscarPorId,
-  atualizarOrdem,
-  deletarOrdem
-};
+module.exports = { criarOrdem, listarOrdens, buscarPorId, atualizarOrdem, deletarOrdem };

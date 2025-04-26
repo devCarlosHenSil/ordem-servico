@@ -1,63 +1,59 @@
 const ordemService = require('../../application/usecases/ordemService');
 
-const getTodasOrdens = async (req, res) => {
+exports.getTodasOrdens = async (req, res) => {
   try {
-    const ordens = await OrdemService.buscarTodas();
+    const ordens = await ordemService.listarOrdens();
     res.status(200).json(ordens);
   } catch (error) {
+    console.error('Erro getTodasOrdens:', error);
     res.status(500).json({ error: 'Erro ao buscar ordens de serviço' });
   }
 };
 
-const getOrdemPorId = async (req, res) => {
+exports.getOrdemPorId = async (req, res) => {
   try {
-    const ordem = await OrdemService.buscarPorId(req.params.id);
-    if (!ordem) {
-      return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
-    }
+    const ordem = await ordemService.buscarPorId(req.params.id);
+    if (!ordem) return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
     res.status(200).json(ordem);
   } catch (error) {
+    console.error('Erro getOrdemPorId:', error);
     res.status(500).json({ error: 'Erro ao buscar ordem de serviço' });
   }
 };
 
-const criarOrdem = async (req, res) => {
+exports.criarOrdem = async (req, res) => {
   try {
-    const novaOrdem = await OrdemService.criar(req.body);
+    const novaOrdem = await ordemService.criarOrdem(req.body);
     res.status(201).json(novaOrdem);
   } catch (error) {
+    console.error('Erro criarOrdem:', error);
+    if (error.name === 'ValidationError') {
+      const erros = {};
+      Object.keys(error.errors).forEach(field => { erros[field] = error.errors[field].message; });
+      return res.status(400).json({ erros });
+    }
     res.status(500).json({ error: 'Erro ao criar ordem de serviço' });
   }
 };
 
-const atualizarOrdem = async (req, res) => {
+exports.atualizarOrdem = async (req, res) => {
   try {
-    const ordemAtualizada = await OrdemService.atualizar(req.params.id, req.body);
-    if (!ordemAtualizada) {
-      return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
-    }
+    const ordemAtualizada = await ordemService.atualizarOrdem(req.params.id, req.body);
+    if (!ordemAtualizada) return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
     res.status(200).json(ordemAtualizada);
   } catch (error) {
+    console.error('Erro atualizarOrdem:', error);
     res.status(500).json({ error: 'Erro ao atualizar ordem de serviço' });
   }
 };
 
-const deletarOrdem = async (req, res) => {
+exports.deletarOrdem = async (req, res) => {
   try {
-    const deletada = await OrdemService.deletar(req.params.id);
-    if (!deletada) {
-      return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
-    }
+    const deletada = await ordemService.deletarOrdem(req.params.id);
+    if (!deletada) return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
     res.status(204).send();
   } catch (error) {
+    console.error('Erro deletarOrdem:', error);
     res.status(500).json({ error: 'Erro ao deletar ordem de serviço' });
   }
-};
-
-module.exports = {
-  getTodasOrdens,
-  getOrdemPorId,
-  criarOrdem,
-  atualizarOrdem,
-  deletarOrdem,
 };
